@@ -7,12 +7,12 @@ from collections import OrderedDict
 
 # ================= 配置区域 =================
 # 建议路径使用正斜杠 / 避免转义问题
-BASE_DIR = "E:/data/software analysis2"
+BASE_DIR = "/data1/xyh/data/software_analysis2"
 CBCT_DIR = os.path.join(BASE_DIR, "CBCT")
 DIAN_DIR = os.path.join(BASE_DIR, "DIAN")
 
-NNUNET_RAW = "E:/data/nnUNetv2/nnUNet_raw"
-TASK_ID = 501
+NNUNET_RAW = "/data1/xyh/data/nnUNet/nnUNet_raw"
+TASK_ID = 505
 TASK_NAME = f"Dataset{TASK_ID}_AirwayLandmarks"
 
 OUT_IMAGES_TR = os.path.join(NNUNET_RAW, TASK_NAME, "imagesTr")
@@ -29,7 +29,8 @@ LANDMARK_MAP = {
 }
 
 # 定义物理半径 (毫米)，保证所有人的标签球在物理空间一样大
-SPHERE_RADIUS_MM = 3.0 
+# SPHERE_RADIUS_MM = 3.0 
+SPHERE_RADIUS_MM = 6.0  # 将物理半径提高为6
 
 # ===========================================
 
