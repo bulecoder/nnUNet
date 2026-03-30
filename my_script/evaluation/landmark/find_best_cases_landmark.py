@@ -5,10 +5,12 @@ import pandas as pd
     在汇总的结果表中找出每个样本的平均误差、最大误差
 """
 
+TASK_ID = 511
+
 # ================= 配置区域 =================
 # 1. 你的汇总 CSV 文件路径 (自动获取同级目录)
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-CSV_PATH = os.path.join(SCRIPT_DIR, "airway_landmark_results_LCC.csv")
+SCRIPT_DIR = os.path.dirname("/data1/xyh/projects/nnUNet/my_script/results/csv/")
+CSV_PATH = os.path.join(SCRIPT_DIR, f"airway_landmark_{TASK_ID}_results_LCC.csv")
 
 # 2. 标签列表
 LABELS = ["AICV", "ANS", "BEP", "PNS", "TEE", "TEP", "TUV"]
@@ -62,7 +64,7 @@ def main():
     print("=" * 90)
 
     # 6. 保存排序后的完整榜单，方便你后续在电脑上慢慢看
-    output_csv = os.path.join(SCRIPT_DIR, "best_cases_ranked_landmark.csv")
+    output_csv = os.path.join(SCRIPT_DIR, f"best_cases_ranked_landmark_{TASK_ID}.csv")
     
     # 调整列顺序，把 Avg 和 Max 放在名字后面，方便查阅
     cols = ['Patient_Name', 'Average_Error', 'Max_Error'] + LABELS

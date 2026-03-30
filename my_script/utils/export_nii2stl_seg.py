@@ -8,20 +8,23 @@ import warnings
     将nii.gz格式的label和validation结果转换为stl格式且保存下来，便于后续相关指标的计算（例如最小横截面积）
 """
 
+TASK_ID = 510
+LANDMARK_ID = 511
+
 # 屏蔽无关警告
 warnings.filterwarnings("ignore")
 
 # ================= 配置区域 =================
 # 1. 金标准 (GT) 配置
-GT_LABELS_DIR = "/data1/xyh/data/nnUNet/nnUNet_raw/Dataset506_AirwaySegmentation/labelsTr"
-GT_EXPORT_DIR = "/data1/xyh/data/nnUNet/nnUNet_results/Dataset506_AirwaySegmentation/comparison_stls/GT"
+GT_LABELS_DIR = f"/data1/xyh/data/nnUNet/nnUNet_raw/Dataset{TASK_ID}_AirwaySegmentation/labelsTr"
+GT_EXPORT_DIR = f"/data1/xyh/data/nnUNet/nnUNet_results/Dataset{TASK_ID}_AirwaySegmentation/comparison_stls/GT"
 
 # 2. 预测结果 (Validation) 配置
-RESULTS_ROOT = "/data1/xyh/data/nnUNet/nnUNet_results/Dataset506_AirwaySegmentation/nnUNetTrainer__nnUNetPlans__3d_fullres"
-VAL_EXPORT_DIR = "/data1/xyh/data/nnUNet/nnUNet_results/Dataset506_AirwaySegmentation/comparison_stls/Validation"
+RESULTS_ROOT = f"/data1/xyh/data/nnUNet/nnUNet_results/Dataset{TASK_ID}_AirwaySegmentation/nnUNetTrainer__nnUNetPlans__3d_fullres"
+VAL_EXPORT_DIR = f"/data1/xyh/data/nnUNet/nnUNet_results/Dataset{TASK_ID}_AirwaySegmentation/comparison_stls/Validation"
 
 # 3. 修正参数 (虽然不修正坐标，但可用于筛选有效样本)
-PARAMS_FILE = "rotation_params.txt"
+PARAMS_FILE = f"rotation_params_{LANDMARK_ID}.txt"
 # ===========================================
 
 def load_valid_cases(file_path):

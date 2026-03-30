@@ -5,13 +5,15 @@ import os
     根据gt和validation的最小横截面积，计算平均误差
 """
 
+TASK_ID = 510
+
 # ================= 配置区域 =================
 # 指向你刚才用 GT-nii 转出的 STL 计算得到的 CSV (列名应包含 Case Name, GT_mCSA_mm2)
-STL_CSV_PATH = '/data1/xyh/projects/nnUNet/nnunetv2/5fold_mcsa_gt_standardized_results.csv'
+STL_CSV_PATH = f'/data1/xyh/projects/nnUNet/my_script/results/csv/5fold_mcsa_gt_standardized_results_{TASK_ID}.csv'
 # 指向你刚才用 Pred-nii 转出的 STL 计算得到的 CSV (列名应包含 Fold, Case Name, Pred_mCSA_mm2)
-VAL_CSV_PATH = '/data1/xyh/projects/nnUNet/nnunetv2/5fold_mcsa_pred_standardized_results.csv'
+VAL_CSV_PATH = f'/data1/xyh/projects/nnUNet/my_script/results/csv/5fold_mcsa_pred_standardized_results_{TASK_ID}.csv'
 # 最终生成的对比报告路径
-OUTPUT_FILE = '/data1/xyh/projects/nnUNet/nnunetv2/5fold_mcsa_final_evaluation_report.csv'
+OUTPUT_FILE = f'/data1/xyh/projects/nnUNet/my_script/results/csv/5fold_mcsa_final_evaluation_report_{TASK_ID}.csv'
 # ===========================================
 
 def main():

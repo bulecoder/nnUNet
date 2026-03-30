@@ -49,7 +49,7 @@ def parse_eval_file(file_path, fold_num):
     print(f'✅ 已解析 Fold{fold_num}：{file_path}，共 {len(results)} 条数据')
     return results
 
-def merge_all_folds_to_csv(fold_file_paths, output_csv=f'airway_segmentation_{TASK_ID}_results_LCC.csv'):
+def merge_all_folds_to_csv(fold_file_paths, output_csv=f'/data1/xyh/projects/nnUNet/my_script/results/csv/airway_segmentation_{TASK_ID}_results_LCC.csv'):
     """
     合并不同目录下的fold结果到CSV
     fold_file_paths: 字典，key=fold编号，value=文件路径
@@ -69,7 +69,7 @@ def merge_all_folds_to_csv(fold_file_paths, output_csv=f'airway_segmentation_{TA
             writer = csv.DictWriter(csvfile, fieldnames=headers)
             writer.writeheader()
             writer.writerows(all_results)
-        print(f'\n🎉 所有结果已汇总到：{os.path.abspath(output_csv)}')
+        print(f'\n🎉 所有结果已汇总到：\n {os.path.abspath(output_csv)}')
     else:
         print('❌ 未解析到任何有效数据！')
 

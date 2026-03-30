@@ -10,13 +10,16 @@ import warnings
 # 屏蔽无关警告
 warnings.filterwarnings("ignore")
 
+TASK_ID = 510
+LAND_ID = 511
+
 # ================= 配置区域 =================
 # 1. 之前脚本导出的平滑 Validation STL 根目录
-VAL_STL_ROOT = "/data1/xyh/data/nnUNet/nnUNet_results/Dataset506_AirwaySegmentation/comparison_stls/Validation"
+VAL_STL_ROOT = f"/data1/xyh/data/nnUNet/nnUNet_results/Dataset{TASK_ID}_AirwaySegmentation/comparison_stls/Validation"
 # 2. 修正后的旋转参数文件
-PARAMS_FILE = "rotation_params.txt"
+PARAMS_FILE = f"/data1/xyh/projects/nnUNet/my_script/results/csv/rotation_params_{LAND_ID}.txt"
 # 3. 输出 CSV 名称
-OUTPUT_CSV = "5fold_mcsa_pred_standardized_results.csv"
+OUTPUT_CSV = f"/data1/xyh/projects/nnUNet/my_script/results/csv/5fold_mcsa_pred_standardized_results_{TASK_ID}.csv"
 # ===========================================
 
 def load_rotation_params(file_path):

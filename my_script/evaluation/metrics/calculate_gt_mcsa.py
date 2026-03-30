@@ -10,12 +10,15 @@ import warnings
 # 1. 彻底屏蔽所有过时警告和 Shapely 内部警告
 warnings.filterwarnings("ignore")
 
+TASK_ID = 510
+LAND_ID = 511
+
 # ================= 配置区域 =================
 # 指向你刚才通过 Label (nii.gz) 转换得到的平滑 STL 路径
-STL_DIR = "/data1/xyh/data/nnUNet/nnUNet_results/Dataset506_AirwaySegmentation/comparison_stls/GT"
+STL_DIR = f"/data1/xyh/data/nnUNet/nnUNet_results/Dataset{TASK_ID}_AirwaySegmentation/comparison_stls/GT"
 # 必须使用最新修正 theta 逻辑后生成的参数文件
-PARAMS_FILE = "rotation_params.txt" 
-OUTPUT_CSV = "5fold_mcsa_gt_standardized_results.csv"
+PARAMS_FILE = f"/data1/xyh/projects/nnUNet/my_script/results/csv/rotation_params_{LAND_ID}.txt" 
+OUTPUT_CSV = f"/data1/xyh/projects/nnUNet/my_script/results/csv/5fold_mcsa_gt_standardized_results_{TASK_ID}.csv"
 # ===========================================
 
 def load_rotation_params(file_path):
