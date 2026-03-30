@@ -3,17 +3,24 @@ import shutil
 import json
 import numpy as np
 import SimpleITK as sitk
-# 从501任务中筛选出同时包含1:AICV, 3:BEP, 5:TEE这三个点的样本，同时屏蔽剩下4个点的标签
+"""
+    从507任务中筛选出同时包含1:AICV, 3:BEP, 5:TEE这三个点的样本，同时屏蔽剩下4个点的标签，设置为508任务
+"""
 
 # ================= 配置区域 =================
+# 原数据存放的主目录
 RAW_DIR = "/data1/xyh/data/nnUNet/nnUNet_raw"
-SOURCE_DATASET = "Dataset501_AirwayLandmarks"
-TARGET_DATASET = "Dataset504_AirwayLandmarks"  # 改为全新的 504 任务
 
-# 原标签中我们要死磕的三个点
+# 数据源：你之前已经清洗过的 507 任务目录
+SOURCE_DATASET = "Dataset507_AirwayLandmarks"
+
+# 目标任务：终极 3 分类特种部队
+TARGET_DATASET = "Dataset508_AirwayHardLandmarks"
+
+# 我们要死磕的三个核心难点 (在 507 中的原标签 ID)
 TARGET_POINTS_IN_SRC = {"AICV": 1, "BEP": 3, "TEE": 5}
 
-# 强行重映射为纯粹的 1, 2, 3 分类
+# 强行重映射为 nnU-Net 要求的连续分类：1, 2, 3
 NEW_MAPPING = {1: 1, 3: 2, 5: 3}
 # ============================================
 
@@ -27,7 +34,7 @@ def main():
     dst_images_dir = os.path.join(dst_dir, "imagesTr")
     dst_labels_dir = os.path.join(dst_dir, "labelsTr")
 
-    # 创建 504 目录
+    # 创建 508 目录，如果存在则清空
     if os.path.exists(dst_dir):
         print(f"🧹 发现已存在的 {TARGET_DATASET}，正在清理...")
         shutil.rmtree(dst_dir)
@@ -39,7 +46,7 @@ def main():
     total_files = len(label_files)
     valid_cases_count = 0
 
-    print(f"🔍 开始洗盘：提取并重映射纯净的 3 分类数据到 504 任务...\n")
+    print(f"🔍 开始洗盘：提取并重映射纯净的 3 分类数据到 508 任务...\n")
 
     for idx, label_file in enumerate(label_files, 1):
         print(f"[{idx:03d}/{total_files}] 处理 {label_file:<20} ... ", end="", flush=True)
@@ -49,7 +56,7 @@ def main():
         arr = sitk.GetArrayFromImage(img)
         unique_vals = np.unique(arr)
 
-        # 检查是否同时包含 1, 3, 5
+        # 核心过滤：检查是否同时包含 1, 3, 5 这三个原标签
         if all(src_id in unique_vals for src_id in TARGET_POINTS_IN_SRC.values()):
             valid_cases_count += 1
             print(f"🌟 命中！(提取并重映射为 1,2,3...)")
@@ -66,15 +73,15 @@ def main():
             new_img.CopyInformation(img)
             sitk.WriteImage(new_img, os.path.join(dst_labels_dir, label_file))
             
-            # 复制图像
+            # 复制原图像
             base_name = label_file.replace('.nii.gz', '')
             image_file = f"{base_name}_0000.nii.gz"
             shutil.copy(os.path.join(src_images_dir, image_file), os.path.join(dst_images_dir, image_file))
         else:
-            print("跳过")
+            print("跳过 (数据不全)")
 
     print("-" * 60)
-    print(f"🎉 彻底洗盘完成！共提取 {valid_cases_count} 个纯净 3分类病例到 Dataset504。")
+    print(f"🎉 彻底洗盘完成！共提取 {valid_cases_count} 个纯净 3分类病例到 {TARGET_DATASET}。")
 
     # 生成全新的 3分类 dataset.json
     dataset_info = {

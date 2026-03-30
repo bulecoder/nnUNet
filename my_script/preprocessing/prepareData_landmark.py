@@ -4,6 +4,10 @@ import numpy as np
 import SimpleITK as sitk
 import trimesh
 from collections import OrderedDict
+"""
+    数据预处理脚本，不能保证每次运行得到的顺序一样
+    使用数字来重新命名
+"""
 
 # ================= 配置区域 =================
 # 建议路径使用正斜杠 / 避免转义问题
@@ -12,7 +16,7 @@ CBCT_DIR = os.path.join(BASE_DIR, "CBCT")
 DIAN_DIR = os.path.join(BASE_DIR, "DIAN")
 
 NNUNET_RAW = "/data1/xyh/data/nnUNet/nnUNet_raw"
-TASK_ID = 505
+TASK_ID = 509
 TASK_NAME = f"Dataset{TASK_ID}_AirwayLandmarks"
 
 OUT_IMAGES_TR = os.path.join(NNUNET_RAW, TASK_NAME, "imagesTr")
@@ -31,6 +35,7 @@ LANDMARK_MAP = {
 # 定义物理半径 (毫米)，保证所有人的标签球在物理空间一样大
 # SPHERE_RADIUS_MM = 3.0 
 SPHERE_RADIUS_MM = 6.0  # 将物理半径提高为6
+# SPHERE_RADIUS_MM = 8.0  # 将物理半径提高为6
 
 # ===========================================
 

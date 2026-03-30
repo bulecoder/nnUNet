@@ -49,6 +49,7 @@ nnUNet_results/
 * 先运行 `prepareData.py`进行数据预处理，数据会处理到 `nnUNet_raw`文件夹中
 * 再运行 `nnUNetv2_plan_and_preprocess -d 501 --verify_dataset_integrity -npfp 1 -np 1`（单进程处理，windows下多进程容易出错），数据会处理到 `nnUNet_preprocessed`中。该命令会默认处理为nnUNetPlans_2d、nnUNetPlans_3d_fullres、nnUNetPlans_3d_lowres，如果只需要nnUNetPlans_3d_fullres，可以使用`nnUNetv2_plan_and_preprocess -d 501 -c 3d_fullres --verify_dataset_integrity`
 * 开始训练，`nnUNetv2_train 501 3d_fullres 0`启动训练，501为任务ID，直接使用3d_fullres配置，0代表Fold 0（默认有5个Fold），默认打开12个以上的进程，在windows上运行容易出错；`CUDA_VISIBLE_DEVICES=1 nnUNetv2_train 501 3d_fullres 1`指定显卡进行训练;`CUDA_VISIBLE_DEVICES=1 NNUNET_COMPILE=f nnUNetv2_train 501 3d_fullres 1`linux下会自动开启编译模式，但是看起来并没有更快，关闭编译的命令；`CUDA_VISIBLE_DEVICES=1 NNUNET_COMPILE=f nnUNet_n_proc_DA=6 nnUNetv2_train 501 3d_fullres 1`linux上面是机械硬盘，默认开启12个进程会导致IO颠簸，降低进程数量（目前看起来6个进程比较合适）；
+* windows上面训练：在终端中使用命令`set NNUNET_n_proc_DA=6`和`set NNUNET_COMPILE=0`（windows下禁用编译优化，避免CUDA编译错误），使用`nnUNetv2_train 501 3d_fullres 1`启动训练
     * 设置环境变量，设置使用主进程加载数据；忽略libiomp 和 libomp 冲突的红字警告；（临时生效，每次打开终端都要输一次）
     ```
     set nnUNet_n_proc_DA=0
@@ -80,6 +81,7 @@ nnUNet_results/
     ```
 
 * 训练完成以后，如果不报错会自动生成一个summary.json文件，progress.png、以及validation里面的预测结果
+* 在windows中训练完成以后进行validatio的时候，由于CBCT数据太大可能会爆显存，导致validation终端，可以将数据移到服务器上面以后再进行validation，使用命令`CUDA_VISIBLE_DEVICES=1 NNUNET_COMPILE=f nnUNet_n_proc_DA=6 nnUNetv2_train 507 3d_fullres 2 --val` --val表示不要训练，直接启动验证，-disable_postprocessing_on_folds表示不用进行自带的LCC后处理，这个后处理之后尝试判断需不需要LCC后处理且如果需要只会生成postprocessing.json文件，不会修改validation文件夹中的内容，我们不需要自带后处理；
 
 
 缺少hiddenlayer库，尝试安装一下
@@ -107,7 +109,7 @@ BEP        | 20
 PNS        | 1
 TEE        | 73
 TEP        | 2
-TUV        | 4
+TUV        | 1
 ------------------------------
 
 
@@ -144,11 +146,10 @@ nnU-Net 默认使用 CrossEntropy + Dice Loss。
 Fold 4 中的 AICV 出现了 10 次“误检(GT无预测有)”，这恰恰证明了模型其实找到了它，只是你的 GT 里没有标，导致它被扣上了“误检”的帽子。
 
 
-### 下一步建议
-修改网络策略（进阶）
-如果要彻底解决“未标注点被当成背景惩罚”的问题，你可能需要放弃纯净版 nnU-Net 的一键运行，去修改它的代码：
-屏蔽梯度（Masked Loss）：在计算 Loss 的代码里加一个 Mask，如果某个病例 GT 里没有标 AICV，那么模型在 AICV 这个通道上的预测结果就不参与 Loss 计算（既不奖励，也不惩罚）。
+* 使用LCC后处理以后，整体结果变好了，但是也有一些样本的结果变差了，而且这些问题主要集中在AICV和BEP这两个点上面
 
+
+### 下一步建议
 
 方案一：数据分流训练法（Sub-dataset Training） —— 最推荐，改动代价为 0，见效最快
 既然 nnU-Net 是个“死脑筋”，我们就不要强迫它在一个模型里学完所有东西。你可以把任务拆分成两个独立的模型：
@@ -161,16 +162,33 @@ Fold 4 中的 AICV 出现了 10 次“误检(GT无预测有)”，这恰恰证�
 标签：保留全部 7 个点。
 预期：在没有任何“错误惩罚”的纯净数据下，AICV 和 TEE 的表现会瞬间起飞，脱离 0 匹配的泥潭。
 
-方案二：修改损失函数（Masked Loss） —— 算法大佬路线，工程难度极大
-如果你不想碰数据，想纯靠算法解决“部分标签缺失 (Partially Labeled Data)”的问题：
-原理：修改 nnU-Net 的底层 Python 代码。在计算 Loss 之前加一行判定：如果当前病例的 GT 里没有 Label 1 (AICV)，那么直接把 Label 1 的预测梯度截断（设为 0），不奖励也不惩罚。
-
 
 实验记录：
 * 筛选出包含AICV、BEP和TEE的样本，但是不屏蔽其他标签进行训练得到的结果（503任务）不理想，4个fold发生了数据坍塌，删除503任务，得出结果数据处理的时候半径可能太小了；
 * 筛选出包含AICV、BEP和TEE的样本，屏蔽其他标签进行三分类训练（504任务），结果优于503任务；
+* 501任务已经确定了半径为3，太小了，效果不好，直接删除，全面被505（半径设置为6）替代；
+* 504也没有意义了，也是半径为3，筛选出标签1、3、5都存在的样本屏蔽其他标签，映射为三分类；后续需要覆盖为半径为6的三分类；
+* 505的数据预处理（prepareData_landmark.py）有问题，没有加入正则化匹配，如果患者姓名里面包含了关键点的缩写，会导致label标识错误，也没有严格后缀匹配，可能导致关键点丢失（但是这一版本结果还比较好）；
+* 507使用新的数据预处理脚本（prepareData_landmark2.py），同样使用半径为6进行划分；
+* 502任务的原始数据中有46个数据标注有问题，结果很差，平均dice在0.6左右，好的结果在0.9以上查的结果小于0.1，502无效
+* 506任务是修正后的数据，确保分割标注数据全部正确;
+* 508任务以半径为6，确保数据标注完全对应正确的情况下，筛选出三个点进行训练，效果没有提升，完全失败的尝试;
+* 509任务以半径为8进行划分，相比于半径为6的时候误差并没有减少，相反有些还增加了
+* 510任务以半径为6进行划分，MALOUIN_JACQUELINE_1932_11_10这个样本的label专门由prepareData_seg2.py来处理。510的结果全面比506要更好，更强的鲁棒性，更优的边界质量；
+* 511任务，纠正了几个原始定点标注错误，然后使用prepareData_landmark2.py来进行数据预处理（保留患者姓名）
 
+
+数据检查记录：
+* MALOUIN_JACQUELINE_1932_11_10这个样本，CBCT和STL是对齐的，但是使用prepareData_seg.py脚本转换为nii.gz以后，就不对齐了，使用prepareData_seg2.py来单独处理这个样本，数据保存在test_alignment文件夹中（定点和CBCT是对齐的）
+
+* KARILAID_Tarmo 这个样本，定点的nii.gz和分割的image放在一起，定点的nii.gz是椭圆形不是圆形，但是点的位置是对的；定点的nii.gz和定点的image放一起，同样是对齐的，但是nii.gz是椭圆形不是圆形
+
+已解决：
+* STEPHANIS_James_1958_6_30 这个样本定点的标注和定点的CBCT图像不对齐
+* STUCKGOLD_ANDREW 这个样本定点的标注和定点的CBCT图像不对齐
+* THOMPSON_Gerard_1949_5_3 这个样本定点的标注和定点的CBCT图像不对齐
 
 
 ## 分割
 * 使用prepareData_seg.py以后，得到的label和image是对齐的，但是label和stl是不对齐的，也就是说事实上stl和image也是不对齐的。这是因为STL在导出的时候缺少了坐标系的信息，而在做预处理的时候实际上是根据 CBCT 的“地图”把 STL 重新定位并画在了正确的位置上。
+* 后续人工校对以后，发现有46个样本数据有问题，由stl得到的label也无法与image对齐，返工重新标注完成，现在所有由stl得到的label都可以与image对齐;

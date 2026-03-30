@@ -14,11 +14,17 @@ from vtk.util import numpy_support
 
 # ================= 配置区域 =================
 BASE_DIR = "/data1/xyh/data/software_analysis2"
+# BASE_DIR = "/data1/xyh/data/MisalignedData"
+
 CBCT_DIR = os.path.join(BASE_DIR, "CBCT")
 STL_DIR = os.path.join(BASE_DIR, "stl") 
+# STL_DIR = os.path.join(BASE_DIR, "aligned") 
+
 
 NNUNET_RAW = "/data1/xyh/data/nnUNet/nnUNet_raw"
-TASK_ID = 502  
+# TASK_ID = 502
+# TASK_ID = 506 
+TASK_ID = 510
 TASK_NAME = f"Dataset{TASK_ID}_AirwaySegmentation"
 
 OUT_IMAGES_TR = os.path.join(NNUNET_RAW, TASK_NAME, "imagesTr")

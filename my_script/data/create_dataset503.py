@@ -3,8 +3,9 @@ import shutil
 import json
 import numpy as np
 import SimpleITK as sitk
-# 从501任务中筛选出同时包含1:AICV, 3:BEP, 5:TEE这三个点的样本，但不屏蔽剩下4个点的标签
-
+"""
+    从501任务中筛选出同时包含1:AICV, 3:BEP, 5:TEE这三个点的样本，但不屏蔽剩下4个点的标签，设置为503任务
+"""
 # ================= 配置区域 (请确认路径) =================
 # nnUNet_raw 的根目录路径
 RAW_DIR = "/data1/xyh/data/nnUNet/nnUNet_raw"
