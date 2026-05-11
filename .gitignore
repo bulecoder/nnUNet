@@ -111,6 +111,8 @@ ENV/
 *.jpg
 *.jpeg
 *.csv
+*.vtk
+*.xlsx
 
 *.model
 
