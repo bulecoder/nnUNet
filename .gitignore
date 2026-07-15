@@ -88,6 +88,12 @@ ENV/
 # Rope project settings
 .ropeproject
 
+# Diagnostic_classification
+Diagnostic_classification/*
+
+# Diagnostic_classification/reports/
+my_script/Diagnostic_classification/reports/
+
 *.memmap
 *.png
 *.zip
@@ -113,6 +119,7 @@ ENV/
 *.csv
 *.vtk
 *.xlsx
+*.dcm
 
 *.model
 
